@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Первый проект с нейросетью</title>
+<meta name="description" content="Бесплатный урок для детей 9–12 лет: первый проект с нейросетью за 30 минут и проверка её слов на деле.">
+<style>
+:root{color-scheme:light}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+[hidden]{display:none!important}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&display=swap">
+<style>
+/* Layout: одна колонка. Шапка с выбором героя, затем пять шагов-карточек с копируемыми запросами, финал и блок для родителя. Синий для действий, жёлтый для результата. */
+:root{
+  --bg:#F4F6FB;
+  --surface:#FFFFFF;
+  --ink:#14182B;
+  --muted:#5A6279;
+  --line:#DCE1EE;
+  --accent:#2F54E0;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#E3E9FF;
+  --result:#FFD84D;
+  --result-ink:#3A2E00;
+  --code-bg:#0F1530;
+  --code-ink:#E8ECFF;
+  --font-body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-display:'Unbounded','Onest',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1020;--surface:#161B33;--ink:#EAEDFB;--muted:#A0A8C6;--line:#2A3154;
+    --accent:#7B96FF;--accent-ink:#0D1020;--accent-soft:#222B5C;
+    --result:#FFD84D;--result-ink:#3A2E00;--code-bg:#0A0D1C;--code-ink:#E8ECFF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1020;--surface:#161B33;--ink:#EAEDFB;--muted:#A0A8C6;--line:#2A3154;
+  --accent:#7B96FF;--accent-ink:#0D1020;--accent-soft:#222B5C;
+  --result:#FFD84D;--result-ink:#3A2E00;--code-bg:#0A0D1C;--code-ink:#E8ECFF;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.55;margin:0;padding-inline:16px;padding-block:28px 72px}
+.wrap{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--font-display);font-weight:600;line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,6vw,2.6rem)}
+h2{font-size:1.2rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.label{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;flex-direction:column;gap:12px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font-size:.85rem;font-weight:600;padding:4px 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.hero-pick{display:flex;flex-wrap:wrap;gap:10px}
+.hero-pick label{cursor:pointer}
+.hero-pick input{position:absolute;opacity:0;pointer-events:none}
+.hero-pick span{display:flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--line);border-radius:12px;background:var(--surface);font-weight:500}
+.hero-pick span b{font-size:1.5rem;font-weight:400;line-height:1}
+.hero-pick input:checked+span{border-color:var(--accent);background:var(--accent-soft)}
+.hero-pick input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.step-head{display:flex;gap:12px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.step-head h2{flex:1;min-width:0}
+.time{font-size:.85rem;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.prompt{display:flex;flex-direction:column;gap:8px}
+.prompt-box{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;font-size:.95rem;line-height:1.5;overflow-wrap:anywhere}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;background:var(--accent);color:var(--accent-ink);cursor:pointer;align-self:flex-start}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+.btn.copied{background:var(--result);color:var(--result-ink)}
+.see{background:var(--result);color:var(--result-ink);border-radius:10px;padding:12px 14px;font-weight:500}
+.see b{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:10px}
+details .prompt-box{margin-top:6px}
+ol.how{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.done{display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:600}
+.done input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.done input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.progress{display:flex;gap:12px;align-items:center;font-size:.9rem;color:var(--muted)}
+.bar{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.finish{background:var(--result);color:var(--result-ink);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.finish h2{font-size:1.3rem}
+.parent ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.cta{border:2px solid var(--accent);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--result-ink);color:var(--result);border-radius:99px;padding:8px 18px 8px 10px;font-weight:600}
+.badge i{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--result);color:var(--result-ink);font-style:normal;font-size:1.1rem}
+.demos{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.demos>*{min-width:0}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.demo h3{font-family:var(--font-display);font-size:1rem;font-weight:600;margin:0}
+.demo .when{font-size:.8rem;color:var(--muted);font-weight:600}
+.stage{background:#0F1530;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:#E8ECFF;position:relative}
+.stage canvas{display:block;max-width:100%;height:auto}
+.stage canvas:focus-visible{outline:2px solid var(--result)}
+.pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:6px;justify-content:center;padding:10px 0}
+.pad button{font:inherit;border:0;border-radius:8px;background:#26305F;color:#E8ECFF;font-size:1.1rem;cursor:pointer;touch-action:none}
+.pad button:active{background:#3A4896}
+.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+.score{position:absolute;top:8px;left:12px;font-weight:600;color:#FFD84D;font-variant-numeric:tabular-nums}
+.quiz{padding:16px;width:100%;display:flex;flex-direction:column;gap:10px;font-size:.95rem}
+.quiz button{font:inherit;text-align:left;border:2px solid #3A4896;background:#161D45;color:#E8ECFF;border-radius:10px;padding:8px 12px;cursor:pointer}
+.quiz button.ok{border-color:#4ADE80;background:#12402A}
+.quiz button.no{border-color:#F87171;background:#4A1818}
+.quiz .q{font-weight:600}
+.card-demo{padding:16px;width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.card-demo .msg{font-family:var(--font-display);font-size:1.05rem;color:#FFD84D;min-height:3.2em}
+.card-demo .btn{align-self:center}
+.path{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));counter-reset:p}
+.path>*{min-width:0}
+.pstep{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.pstep .n{font-size:.8rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.pstep b{font-family:var(--font-display);font-size:.95rem;font-weight:600}
+.pstep .get{margin-top:4px;font-size:.88rem;background:var(--accent-soft);border-radius:8px;padding:6px 10px}
+a{color:var(--accent);font-weight:600}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="label">Бесплатный урок для детей 9–12 лет</div>
+  <h1>Первый проект с нейросетью за 30 минут</h1>
+  <p class="muted">Ты опишешь нейросети свой первый проект: игру, в которую можно играть. Она напишет код, а ты запустишь его, починишь, изменишь и в конце проверишь, правда ли нейросеть всё поняла. Программировать заранее не нужно. Нужен компьютер, интернет и браузер.</p>
+  <div class="meta"><span class="pill">30 минут</span><span class="pill">6 шагов</span><span class="pill">без регистрации</span></div>
+</header>
+
+<section class="card" aria-labelledby="pick">
+  <h2 id="pick">Выбери героя игры</h2>
+  <p class="muted">Всё, что написано в запросах ниже, подставится само.</p>
+  <div class="hero-pick" role="radiogroup" aria-label="Герой игры">
+    <label><input type="radio" name="hero" value="динозавр" data-emoji="🦖" checked><span><b>🦖</b>динозавр</span></label>
+    <label><input type="radio" name="hero" value="кот" data-emoji="🐱"><span><b>🐱</b>кот</span></label>
+    <label><input type="radio" name="hero" value="робот" data-emoji="🤖"><span><b>🤖</b>робот</span></label>
+    <label><input type="radio" name="hero" value="дракон" data-emoji="🐲"><span><b>🐲</b>дракон</span></label>
+    <label><input type="radio" name="hero" value="космонавт" data-emoji="🧑‍🚀"><span><b>🧑‍🚀</b>космонавт</span></label>
+  </div>
+  <div class="progress" aria-live="polite"><span id="pText">Пройдено 0 из 6</span><div class="bar"><i id="pBar"></i></div></div>
+</section>
+
+<section class="card" id="s0">
+  <div class="step-head"><h2>Шаг 1. Открой нейросеть</h2><span class="time">2 минуты</span></div>
+  <p>Мы работаем в Алисе AI. Она открывается из России в браузере, регистрироваться для первых запросов не нужно.</p>
+  <ol class="how">
+    <li>Открой Алису AI: <a href="https://alice.yandex.ru" target="_blank" rel="noopener">alice.yandex.ru</a></li>
+    <li>Найди окно, куда пишут сообщение.</li>
+    <li>Не пиши туда свою фамилию, адрес и школу. Нейросеть это не нужно.</li>
+  </ol>
+  <div class="see"><b>Что должно получиться</b>Перед тобой открыт чат и пустая строка для сообщения.</div>
+  <label class="done"><input type="checkbox" data-step="0"> Шаг готов</label>
+</section>
+
+<section class="card" id="s1">
+  <div class="step-head"><h2>Шаг 2. Опиши свой проект словами</h2><span class="time">7 минут</span></div>
+  <div class="prompt">
+    <div class="label">Запрос для нейросети</div>
+    <div class="prompt-box" id="p1">Сделай игру-кликер в одном HTML-файле. Герой: <span class="hn">динозавр</span>, нарисуй его большим эмодзи <span class="he">🦖</span> по центру экрана. Вокруг героя не должно быть рамки, фона или кнопки, только сам эмодзи. Когда я нажимаю на героя, счёт растёт на 1 и показывается сверху. Весь код дай одним блоком, без объяснений.</div>
+    <button class="btn" data-copy="p1">Скопировать запрос</button>
+  </div>
+  <p><b>Как сохранить игру.</b></p>
+  <ol class="how">
+    <li>Скопируй весь код из ответа нейросети (обычно там есть кнопка «Копировать»).</li>
+    <li>Открой «Блокнот»: нажми кнопку Пуск и набери «Блокнот».</li>
+    <li>Вставь код (Ctrl+V).</li>
+    <li>Нажми «Файл», «Сохранить как». В поле «Имя файла» напиши <b>game.html</b>. В поле «Тип файла» выбери «Все файлы». Сохрани на рабочий стол.</li>
+    <li>Дважды нажми на файл game.html. Он откроется в браузере.</li>
+  </ol>
+  <div class="see"><b>Что должно получиться</b>На странице большой герой. Нажимаешь на него, и счёт сверху растёт.</div>
+  <details>
+    <summary>Не получилось</summary>
+    <p class="muted">Если открылся белый экран или набор символов, скопируй этот запрос и отправь нейросети вместе с кодом, который не работает.</p>
+    <div class="prompt-box" id="f1">Игра не открывается или не работает. Вот что я вижу: (опиши своими словами). Исправь и дай весь код целиком одним блоком, без объяснений.</div>
+    <button class="btn ghost" data-copy="f1" style="margin-top:8px">Скопировать</button>
+  </details>
+  <label class="done"><input type="checkbox" data-step="1"> Шаг готов</label>
+</section>
+
+<section class="card" id="s2">
+  <div class="step-head"><h2>Шаг 3. Сделай красиво</h2><span class="time">5 минут</span></div>
+  <p>Теперь меняем внешний вид. Вставь запрос в тот же чат, где ты писал прошлый.</p>
+  <div class="prompt">
+    <div class="label">Запрос для нейросети</div>
+    <div class="prompt-box" id="p2">Добавь в игру тёмно-синий фон страницы, крупный жёлтый счёт и плавное увеличение героя, когда я на него нажимаю. Фон должен быть только у страницы. У героя фона, рамки и квадрата вокруг нет. Дай весь код целиком одним блоком.</div>
+    <button class="btn" data-copy="p2">Скопировать запрос</button>
+  </div>
+  <ol class="how">
+    <li>Скопируй новый код.</li>
+    <li>Открой game.html в «Блокноте» (правая кнопка мыши, «Открыть с помощью», «Блокнот»).</li>
+    <li>Выдели всё (Ctrl+A), вставь новый код (Ctrl+V), сохрани (Ctrl+S).</li>
+    <li>Обнови страницу в браузере (клавиша F5).</li>
+  </ol>
+  <div class="see"><b>Что должно получиться</b>Фон стал тёмно-синим, счёт жёлтый, герой при нажатии увеличивается.</div>
+  <details>
+    <summary>Вокруг героя появился цветной квадрат</summary>
+    <p class="muted">Нейросеть покрасила не только страницу, но и блок с героем. Это можно исправить одним запросом.</p>
+    <div class="prompt-box" id="f2b">Вокруг героя появился цветной квадрат. Убери его: у героя должен быть прозрачный фон, без рамки и тени-квадрата. Дай весь код целиком одним блоком.</div>
+    <button class="btn ghost" data-copy="f2b" style="margin-top:8px">Скопировать</button>
+  </details>
+  <details>
+    <summary>Не получилось</summary>
+    <div class="prompt-box" id="f2">После твоих изменений игра перестала работать. Вот что я вижу: (опиши своими словами). Верни рабочую версию и добавь изменения заново. Дай весь код целиком одним блоком.</div>
+    <button class="btn ghost" data-copy="f2" style="margin-top:8px">Скопировать</button>
+  </details>
+  <label class="done"><input type="checkbox" data-step="2"> Шаг готов</label>
+</section>
+
+<section class="card" id="s3">
+  <div class="step-head"><h2>Шаг 4. Пусть герой убегает</h2><span class="time">6 минут</span></div>
+  <div class="prompt">
+    <div class="label">Запрос для нейросети</div>
+    <div class="prompt-box" id="p3">Сделай так, чтобы после каждого нажатия герой прыгал в случайное место экрана. Дай весь код целиком одним блоком.</div>
+    <button class="btn" data-copy="p3">Скопировать запрос</button>
+  </div>
+  <p class="muted">Заменяй код в game.html так же, как в прошлом шаге.</p>
+  <div class="see"><b>Что должно получиться</b>Герой прыгает по экрану. Попасть по нему стало сложнее.</div>
+  <details>
+    <summary>Не получилось</summary>
+    <div class="prompt-box" id="f3">Герой не прыгает по экрану или выходит за его границы. Исправь и дай весь код целиком одним блоком.</div>
+    <button class="btn ghost" data-copy="f3" style="margin-top:8px">Скопировать</button>
+  </details>
+  <label class="done"><input type="checkbox" data-step="3"> Шаг готов</label>
+</section>
+
+<section class="card" id="s4">
+  <div class="step-head"><h2>Шаг 5. Добавь таймер и конец игры</h2><span class="time">6 минут</span></div>
+  <div class="prompt">
+    <div class="label">Запрос для нейросети</div>
+    <div class="prompt-box" id="p4">Добавь таймер на 30 секунд. Когда время вышло, покажи надпись «Игра окончена», итоговый счёт и кнопку «Играть снова». Дай весь код целиком одним блоком.</div>
+    <button class="btn" data-copy="p4">Скопировать запрос</button>
+  </div>
+  <div class="see"><b>Что должно получиться</b>Сверху идёт отсчёт. Через 30 секунд игра останавливается и показывает твой результат.</div>
+  <details>
+    <summary>Не получилось</summary>
+    <div class="prompt-box" id="f4">Таймер не работает или игра не заканчивается. Исправь и дай весь код целиком одним блоком.</div>
+    <button class="btn ghost" data-copy="f4" style="margin-top:8px">Скопировать</button>
+  </details>
+  <label class="done"><input type="checkbox" data-step="4"> Шаг готов</label>
+</section>
+
+<section class="card" id="s5">
+  <div class="step-head"><h2>Шаг 6. Проверь нейросеть</h2><span class="time">6 минут</span></div>
+  <p>Нейросеть написала код. Но правда ли она понимает, что в нём происходит? Проверим её слова на деле.</p>
+  <div class="prompt">
+    <div class="label">Запрос для нейросети</div>
+    <div class="prompt-box" id="p5">Объясни простыми словами для ребёнка 10 лет, что делает этот код. Отдельно скажи, сколько секунд длится игра и в какой строчке это записано. Вот код:</div>
+    <button class="btn" data-copy="p5">Скопировать запрос</button>
+  </div>
+  <ol class="how">
+    <li>Вставь запрос в чат, а под ним весь код из game.html.</li>
+    <li>Прочитай объяснение. Найди, что нейросеть пишет про время игры.</li>
+    <li>Проверь её слова. Открой game.html в «Блокноте», найди это число (Ctrl+F), замени его на <b>10</b>, сохрани (Ctrl+S) и обнови страницу в браузере.</li>
+    <li>Поменяй ещё что-нибудь: цвет, размер героя или скорость.</li>
+  </ol>
+  <div class="see"><b>Что должно получиться</b>Игра теперь идёт 10 секунд. Ты проверил слова нейросети, изменив код сам.</div>
+  <p class="muted">Если нейросеть назвала не то число или не ту строчку, она ошиблась. Теперь ты знаешь, как это проверить: не верить на слово, а попробовать.</p>
+  <label class="done"><input type="checkbox" data-step="5"> Шаг готов</label>
+</section>
+
+<section class="finish" id="finish">
+  <h2>У тебя есть свой первый проект</h2>
+  <p>Ты описал проект словами, запустил код, починил его, изменил сам и проверил слова нейросети. Это и есть вайбкодинг: программирование вместе с нейросетью, где решения принимаешь ты.</p>
+  <p><b>Покажи игру маме, папе или другу.</b> Пусть сыграют и скажут свой результат.</p>
+  <span class="badge"><i aria-hidden="true">★</i>Значок «Первый проект»</span>
+</section>
+
+<section aria-labelledby="next" style="display:flex;flex-direction:column;gap:16px">
+  <div>
+    <div class="label">Что дальше</div>
+    <h2 id="next">Это был первый проект. Вот что ты сможешь через два месяца</h2>
+    <p class="muted" style="margin-top:8px">Ниже четыре работы, которые дети делают на занятиях. Они настоящие: нажимай, играй, смотри.</p>
+  </div>
+  <div class="demos">
+
+    <div class="demo">
+      <div class="when">Занятия 4–11</div>
+      <h3>Рисунок, который рисует код</h3>
+      <div class="stage"><canvas id="cvTurtle" width="320" height="220" aria-label="Узор рисуется сам"></canvas></div>
+      <p class="muted">Ты пишешь команды для черепашки, и она рисует. Меняешь число, получаешь новый узор.</p>
+    </div>
+
+    <div class="demo">
+      <div class="when">Занятия 12–19</div>
+      <h3>Игра, которой управляешь сам</h3>
+      <div class="stage">
+        <span class="score" id="gScore">Звёзд: 0</span>
+        <canvas id="cvGame" width="320" height="200" tabindex="0" aria-label="Игра: собери звёзды"></canvas>
+        <div class="pad" aria-label="Кнопки управления">
+          <button class="u" data-dir="up" aria-label="Вверх">▲</button>
+          <button class="l" data-dir="left" aria-label="Влево">◀</button>
+          <button class="d" data-dir="down" aria-label="Вниз">▼</button>
+          <button class="r" data-dir="right" aria-label="Вправо">▶</button>
+        </div>
+      </div>
+      <p class="muted">Твой герой собирает звёзды. Нажми на поле и двигайся стрелками или кнопками.</p>
+    </div>
+
+    <div class="demo">
+      <div class="when">Свой проект</div>
+      <h3>Викторина по любимой теме</h3>
+      <div class="stage"><div class="quiz" id="quiz"></div></div>
+      <p class="muted">Ты придумываешь вопросы про динозавров, футбол или Майнкрафт. Друзья и семья играют.</p>
+    </div>
+
+    <div class="demo">
+      <div class="when">Свой проект</div>
+      <h3>Открытка с сюрпризом</h3>
+      <div class="stage">
+        <div class="card-demo">
+          <div class="msg" id="cardMsg" aria-live="polite">Для мамы, папы или друга</div>
+          <canvas id="cvConf" width="320" height="120" aria-hidden="true"></canvas>
+          <button class="btn" id="cardBtn">Открыть открытку</button>
+        </div>
+      </div>
+      <p class="muted">Ты делаешь поздравление, которого нет ни в одном магазине.</p>
+    </div>
+
+  </div>
+</section>
+
+<section aria-labelledby="harder" style="display:flex;flex-direction:column;gap:16px">
+  <div>
+    <div class="label">Что дальше труднее</div>
+    <h2 id="harder">Первый проект получился быстро. Теперь задачи посложнее</h2>
+    <p class="muted" style="margin-top:8px">Нейросеть быстро даёт первый результат. На сложных задачах нужно понимать, как всё устроено, и в одиночку здесь легко застрять.</p>
+  </div>
+  <div class="path">
+    <div class="pstep"><span class="n">Задача 1</span><b>Игра с уровнями и рекордом</b><span>Одного запроса мало. Нужно придумать правила, понять, где хранится счёт, и проверить каждый уровень.</span></div>
+    <div class="pstep"><span class="n">Задача 2</span><b>Ошибка, которую нейросеть не исправляет</b><span>Она присылает код с той же ошибкой три раза подряд. Ребёнок учится читать код, находить место сбоя и объяснять его словами.</span></div>
+    <div class="pstep"><span class="n">Задача 3</span><b>У тебя работает, у друга нет</b><span>Другой браузер или экран, и страница ломается. Чтобы найти причину, нужно понимать, как она устроена.</span></div>
+  </div>
+  <p>Первый проект можно сделать самому, и этот урок бесплатный. На занятиях мы разбираем такие задачи вместе и доводим проект до конца.</p>
+</section>
+
+<section aria-labelledby="route" style="display:flex;flex-direction:column;gap:16px">
+  <div>
+    <div class="label">Как идёт курс</div>
+    <h2 id="route">Сорок занятий, и каждое заканчивается результатом</h2>
+    <p class="muted" style="margin-top:8px">Два занятия в неделю по 60 минут, около пяти месяцев. На каждом занятии ты что-то запускаешь, чинишь или улучшаешь. Сидеть и слушать целый час не придётся.</p>
+  </div>
+  <div class="path">
+    <div class="pstep"><span class="n">Занятия 1–19</span><b>Старт</b><span>Правила работы с нейросетью, основы кода, проверка ответов, твоя первая игра.</span><span class="get">Игра и значки «Ловец ошибок» и «Починщик»</span></div>
+    <div class="pstep"><span class="n">Занятия 20–35</span><b>Свой проект</b><span>Придумываешь идею сам: игру, викторину, страницу или генератор.</span><span class="get">Проект по твоей идее</span></div>
+    <div class="pstep"><span class="n">Занятия 36–40</span><b>Защита</b><span>Собираешь страницу «Мои проекты» и показываешь работы родителям.</span><span class="get">Портфолио из 5–6 работ</span></div>
+  </div>
+</section>
+
+<section class="card parent" aria-labelledby="par">
+  <div class="label">Для родителя</div>
+  <h2 id="par">Чему ребёнок научился за этот урок</h2>
+  <ul>
+    <li><b>Проверять ответы нейросети.</b> Он попросил объяснить код и проверил её слова экспериментом: поменял число и увидел результат. Нейросеть пишет уверенно, даже когда неправа, и этот навык нужен и в учёбе.</li>
+    <li><b>Ставить задачу.</b> Чтобы получить нужный результат, пришлось описать, что именно нужно, шаг за шагом. Так работают с заданием для разработчика.</li>
+    <li><b>Исправлять, а не бросать.</b> Нейросеть ошибается, и ребёнок учится описывать проблему и добиваться исправления.</li>
+    <li><b>Понимать, что внутри.</b> В конце он меняет код своими руками и видит, как это влияет на результат.</li>
+  </ul>
+  <p class="muted"><b>Безопасность.</b> По правилам сервисов нейросети часто рассчитаны на взрослых, поэтому ребёнок работает рядом с вами или с вашего аккаунта. Просите не вводить в чат фамилию, адрес, школу и фото. Ничего устанавливать не нужно: проект сохраняется одним файлом и открывается в браузере.</p>
+</section>
+
+<section class="cta">
+  <div class="label">Что дальше</div>
+  <h2>Хочешь сделать следующий проект со мной?</h2>
+  <p>На бесплатном занятии мы вместе соберём новый проект, которого нет в этом уроке. Ты придумаешь идею и правила, нейросеть напишет код, а я покажу, как проверять и чинить. Через 60 минут у тебя будет вторая работа в коллекции.</p>
+  <p>Родителям: на занятии мы смотрим уровень ребёнка и подбираем формат, индивидуальный или группу. Не подойдёт, ничего платить не придётся.</p>
+  <p class="muted"><b>Ссылка для записи:</b> <span id="ctaSlot">будет добавлена перед публикацией</span></p>
+</section>
+
+</div>
+
+<script>
+(function(){
+  /* Подстановка героя в запросы */
+  var radios=[].slice.call(document.querySelectorAll('input[name="hero"]'));
+  function applyHero(){
+    var r=radios.filter(function(x){return x.checked})[0]||radios[0];
+    [].forEach.call(document.querySelectorAll('.hn'),function(e){e.textContent=r.value});
+    [].forEach.call(document.querySelectorAll('.he'),function(e){e.textContent=r.getAttribute('data-emoji')});
+    try{localStorage.setItem('lm-hero',r.value)}catch(e){}
+  }
+  try{
+    var h=localStorage.getItem('lm-hero');
+    if(h) radios.forEach(function(x){ if(x.value===h) x.checked=true; });
+  }catch(e){}
+  radios.forEach(function(x){x.addEventListener('change',applyHero)});
+  applyHero();
+
+  /* Копирование */
+  function fallbackCopy(el){
+    var r=document.createRange();r.selectNodeContents(el);
+    var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+  }
+  [].forEach.call(document.querySelectorAll('[data-copy]'),function(btn){
+    var orig=btn.textContent;
+    btn.addEventListener('click',function(){
+      var el=document.getElementById(btn.getAttribute('data-copy'));
+      var text=el.innerText.trim();
+      var ok=function(){
+        btn.textContent='Скопировано';btn.classList.add('copied');
+        setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied')},1800);
+      };
+      var fail=function(){
+        fallbackCopy(el);
+        btn.textContent='Выделено, нажми Ctrl+C';
+        setTimeout(function(){btn.textContent=orig},2500);
+      };
+      try{
+        navigator.clipboard.writeText(text).then(ok,fail);
+      }catch(e){fail()}
+    });
+  });
+
+  /* Прогресс */
+  var boxes=[].slice.call(document.querySelectorAll('input[data-step]'));
+  var KEY='lm-steps';
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  boxes.forEach(function(b){ if(saved[b.getAttribute('data-step')]) b.checked=true; });
+  function upd(){
+    var n=boxes.filter(function(b){return b.checked}).length;
+    document.getElementById('pText').textContent='Пройдено '+n+' из '+boxes.length;
+    document.getElementById('pBar').style.width=(n/boxes.length*100)+'%';
+    var s={};boxes.forEach(function(b){if(b.checked)s[b.getAttribute('data-step')]=1});
+    try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+  }
+  boxes.forEach(function(b){b.addEventListener('change',upd)});
+  upd();
+
+
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Демо 1: черепашка рисует узор */
+  (function(){
+    var c=document.getElementById('cvTurtle'),x=c.getContext('2d'),W=c.width,H=c.height;
+    var segs=[],px=0,py=0,ang=0,len=2,i;
+    for(i=0;i<300;i++){
+      var nx=px+len*Math.cos(ang),ny=py+len*Math.sin(ang);
+      segs.push([px,py,nx,ny]);px=nx;py=ny;ang+=Math.PI/180*121;len+=0.9;
+    }
+    var minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+    segs.forEach(function(s){minX=Math.min(minX,s[0],s[2]);maxX=Math.max(maxX,s[0],s[2]);minY=Math.min(minY,s[1],s[3]);maxY=Math.max(maxY,s[1],s[3]);});
+    var k=Math.min((W-24)/(maxX-minX),(H-24)/(maxY-minY));
+    var ox=(W-(maxX-minX)*k)/2-minX*k,oy=(H-(maxY-minY)*k)/2-minY*k;
+    function draw(n){
+      var s=segs[n];x.strokeStyle='hsl('+(n*1.6)%360+',90%,62%)';x.lineWidth=2;
+      x.beginPath();x.moveTo(s[0]*k+ox,s[1]*k+oy);x.lineTo(s[2]*k+ox,s[3]*k+oy);x.stroke();
+    }
+    function clear(){x.fillStyle='#0F1530';x.fillRect(0,0,W,H);}
+    clear();
+    if(reduce){for(i=0;i<segs.length;i++)draw(i);return;}
+    var n=0,wait=0;
+    function tick(){
+      if(wait>0){wait--;if(wait===0){clear();n=0;}}
+      else{for(var j=0;j<3&&n<segs.length;j++){draw(n);n++;}if(n>=segs.length)wait=90;}
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+
+  /* Демо 2: игра со звёздами */
+  (function(){
+    var c=document.getElementById('cvGame'),x=c.getContext('2d'),W=c.width,H=c.height;
+    var p={x:W/2,y:H/2},star={x:60,y:50},score=0,keys={};
+    function heroEmoji(){var r=radios.filter(function(a){return a.checked})[0];return r?r.getAttribute('data-emoji'):'🦖';}
+    function place(){star.x=24+Math.random()*(W-48);star.y=24+Math.random()*(H-48);}
+    place();
+    var map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'};
+    c.addEventListener('keydown',function(e){if(map[e.key]){keys[map[e.key]]=true;e.preventDefault();}});
+    c.addEventListener('keyup',function(e){if(map[e.key]){keys[map[e.key]]=false;e.preventDefault();}});
+    c.addEventListener('blur',function(){keys={};});
+    [].forEach.call(document.querySelectorAll('.pad button'),function(b){
+      var d=b.getAttribute('data-dir');
+      b.addEventListener('pointerdown',function(e){e.preventDefault();keys[d]=true;});
+      ['pointerup','pointerleave','pointercancel'].forEach(function(t){b.addEventListener(t,function(){keys[d]=false;});});
+    });
+    function frame(){
+      var s=2.6;
+      if(keys.left)p.x-=s;if(keys.right)p.x+=s;if(keys.up)p.y-=s;if(keys.down)p.y+=s;
+      p.x=Math.max(18,Math.min(W-18,p.x));p.y=Math.max(18,Math.min(H-18,p.y));
+      if(Math.abs(p.x-star.x)<24&&Math.abs(p.y-star.y)<24){score++;document.getElementById('gScore').textContent='Звёзд: '+score;place();}
+      x.fillStyle='#0F1530';x.fillRect(0,0,W,H);
+      x.textAlign='center';x.textBaseline='middle';
+      x.font='26px sans-serif';x.fillText('⭐',star.x,star.y);
+      x.font='34px sans-serif';x.fillText(heroEmoji(),p.x,p.y);
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
+
+  /* Демо 3: викторина */
+  (function(){
+    var box=document.getElementById('quiz');
+    var qs=[
+      {q:'Кто жил в эпоху динозавров?',a:['Тираннозавр','Мамонт','Саблезубый тигр'],ok:0},
+      {q:'Когда вымерли динозавры?',a:['6 000 лет назад','66 миллионов лет назад','66 лет назад'],ok:1}
+    ];
+    var i=0,sc=0;
+    function show(){
+      box.innerHTML='';
+      if(i>=qs.length){
+        var d=document.createElement('div');d.className='q';d.textContent='Твой результат: '+sc+' из '+qs.length+'. Такую игру ты сделаешь сам.';box.appendChild(d);
+        var r=document.createElement('button');r.textContent='Сыграть ещё раз';r.onclick=function(){i=0;sc=0;show();};box.appendChild(r);return;
+      }
+      var q=document.createElement('div');q.className='q';q.textContent=qs[i].q;box.appendChild(q);
+      qs[i].a.forEach(function(t,idx){
+        var b=document.createElement('button');b.textContent=t;
+        b.onclick=function(){
+          var all=box.querySelectorAll('button');
+          [].forEach.call(all,function(z,zi){z.disabled=true;if(zi===qs[i].ok)z.className='ok';});
+          if(idx===qs[i].ok)sc++;else b.className='no';
+          setTimeout(function(){i++;show();},900);
+        };
+        box.appendChild(b);
+      });
+    }
+    show();
+  })();
+
+  /* Демо 4: открытка с конфетти */
+  (function(){
+    var btn=document.getElementById('cardBtn'),msg=document.getElementById('cardMsg');
+    var c=document.getElementById('cvConf'),x=c.getContext('2d'),W=c.width,H=c.height,parts=[],run=false;
+    btn.addEventListener('click',function(){
+      msg.textContent='С днём рождения! Эту открытку сделал я.';
+      if(reduce)return;
+      parts=[];
+      for(var i=0;i<70;i++)parts.push({x:W/2,y:H,vx:(Math.random()-.5)*7,vy:-(4+Math.random()*7),c:'hsl('+Math.floor(Math.random()*360)+',90%,60%)',t:0});
+      if(!run){run=true;loop();}
+    });
+    function loop(){
+      x.clearRect(0,0,W,H);var alive=false;
+      parts.forEach(function(p){p.t++;p.vy+=0.25;p.x+=p.vx;p.y+=p.vy;if(p.y<H+10&&p.t<110){alive=true;x.fillStyle=p.c;x.fillRect(p.x,p.y,5,5);}});
+      if(alive)requestAnimationFrame(loop);else{run=false;x.clearRect(0,0,W,H);}
+    }
+  })();
+})();
+</script>
+
+</body>
+</html>
