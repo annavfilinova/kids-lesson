@@ -45,7 +45,7 @@ body{margin:0}
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.55;margin:0;padding-inline:16px;padding-block:28px 72px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.55;margin:0;padding-inline:16px;padding-block:28px 100px}
 .wrap{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:28px}
 h1,h2{font-family:var(--font-display);font-weight:600;line-height:1.2;text-wrap:balance;margin:0}
 h1{font-size:clamp(1.7rem,6vw,2.6rem)}
@@ -102,6 +102,11 @@ ol.how{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 .proj-pick input:focus-visible+.pc{outline:2px solid var(--accent);outline-offset:2px}
 .pick-cta{display:flex;flex-direction:column;gap:10px;background:var(--accent-soft);border-radius:12px;padding:16px}
 a.btn{display:inline-block;text-decoration:none;text-align:center}
+.sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);transform:translateY(120%);transition:transform .25s}
+.sticky-cta.show{transform:none}
+.sticky-cta span{font-size:.95rem;font-weight:500}
+.mid-cta{border:2px dashed var(--accent);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+@media (prefers-reduced-motion:reduce){.sticky-cta{transition:none}}
 .badge{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--result-ink);color:var(--result);border-radius:99px;padding:8px 18px 8px 10px;font-weight:600}
 .badge i{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--result);color:var(--result-ink);font-style:normal;font-size:1.1rem}
 .demos{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
@@ -217,6 +222,11 @@ a{color:var(--accent);font-weight:600}
   </details>
   <label class="done"><input type="checkbox" data-step="2"> Шаг готов</label>
 </section>
+
+<aside class="mid-cta" id="midCta">
+  <p><b>Получилось?</b> Второй проект можно сделать вместе со мной на бесплатном занятии. Записывает родитель.</p>
+  <a class="btn ghost" id="midBtn" href="https://t.me/anya_filinova_bot?start=kids" target="_blank" rel="noopener">Записать ребёнка на занятие</a>
+</aside>
 
 <section class="card" id="s3">
   <div class="step-head"><h2>Шаг 4. Пусть герой убегает</h2><span class="time">6 минут</span></div>
@@ -401,6 +411,11 @@ a{color:var(--accent);font-weight:600}
 
 </div>
 
+<div class="sticky-cta" id="stickyCta" role="region" aria-label="Запись на занятие">
+  <span>Бесплатное занятие, 60 минут</span>
+  <a class="btn" id="stickyBtn" href="https://t.me/anya_filinova_bot?start=kids" target="_blank" rel="noopener">Записать ребёнка</a>
+</div>
+
 <script>
 (function(){
   /* Подстановка героя в запросы */
@@ -465,15 +480,29 @@ a{color:var(--accent);font-weight:600}
   (function(){
     var P={quiz:'Викторина про любимое',pet:'Цифровой питомец',card:'Открытка-сюрприз',levels:'Игра с уровнями'};
     var inputs=[].slice.call(document.querySelectorAll('input[name="proj"]'));
-    var text=document.getElementById('pickText'),b1=document.getElementById('pickBtn'),b2=document.getElementById('ctaBtn');
+    var text=document.getElementById('pickText'),b1=document.getElementById('pickBtn'),b2=document.getElementById('ctaBtn'),b3=document.getElementById('midBtn'),b4=document.getElementById('stickyBtn');
     function set(v){
       var url='https://t.me/anya_filinova_bot?start=kids'+(v?'_'+v:'');
-      b1.href=url;b2.href=url;
+      b1.href=url;b2.href=url;b3.href=url;b4.href=url;
       if(v){text.textContent='Ваш ребёнок выбрал второй проект: «'+P[v]+'». Сделаем его вместе на бесплатном занятии за 60 минут. Он придумает героя и правила, а я покажу, как довести до конца то, что одним запросом не получается.';}
       try{if(v)localStorage.setItem('lm-proj',v)}catch(e){}
     }
     try{var sv=localStorage.getItem('lm-proj');if(sv&&P[sv]){inputs.forEach(function(i){if(i.value===sv)i.checked=true});set(sv);}}catch(e){}
     inputs.forEach(function(i){i.addEventListener('change',function(){set(i.value)})});
+  })();
+
+
+  /* Липкая кнопка записи: появляется после шага 2 */
+  (function(){
+    var bar=document.getElementById('stickyCta'),s2=document.getElementById('s2'),done2=document.querySelector('input[data-step="1"]');
+    function upd(){
+      var passed=(window.scrollY+window.innerHeight*0.5)>s2.offsetTop;
+      bar.classList.toggle('show',passed||(done2&&done2.checked));
+    }
+    window.addEventListener('scroll',upd,{passive:true});
+    window.addEventListener('resize',upd);
+    if(done2)done2.addEventListener('change',upd);
+    upd();
   })();
 
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
