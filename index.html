@@ -91,6 +91,17 @@ ol.how{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 .finish h2{font-size:1.3rem}
 .parent ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
 .cta{border:2px solid var(--accent);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.proj-pick{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.proj-pick>*{min-width:0}
+.proj-pick label{cursor:pointer;display:block}
+.proj-pick input{position:absolute;opacity:0;pointer-events:none}
+.proj-pick .pc{height:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:4px}
+.proj-pick .pc b{font-family:var(--font-display);font-size:.95rem;font-weight:600}
+.proj-pick .pc span{font-size:.9rem;color:var(--muted)}
+.proj-pick input:checked+.pc{border-color:var(--accent);background:var(--accent-soft)}
+.proj-pick input:focus-visible+.pc{outline:2px solid var(--accent);outline-offset:2px}
+.pick-cta{display:flex;flex-direction:column;gap:10px;background:var(--accent-soft);border-radius:12px;padding:16px}
+a.btn{display:inline-block;text-decoration:none;text-align:center}
 .badge{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--result-ink);color:var(--result);border-radius:99px;padding:8px 18px 8px 10px;font-weight:600}
 .badge i{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--result);color:var(--result-ink);font-style:normal;font-size:1.1rem}
 .demos{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
@@ -273,6 +284,25 @@ a{color:var(--accent);font-weight:600}
   <span class="badge"><i aria-hidden="true">★</i>Значок «Первый проект»</span>
 </section>
 
+<section class="card" aria-labelledby="second" id="second-sec">
+  <div class="label">Следующий уровень</div>
+  <h2 id="second">Выбери свой второй проект</h2>
+  <p class="muted">Первый проект ты сделал по моим подсказкам. Второй сделаем вместе на бесплатном занятии: я покажу то, что с одного запроса не получается. Что хочешь собрать? Выбери, а потом покажи свой проект маме или папе. Записывают на занятие они.</p>
+  <div class="proj-pick" role="radiogroup" aria-label="Второй проект">
+    <label><input type="radio" name="proj" value="quiz"><div class="pc"><b>Викторина про любимое</b><span>Динозавры, футбол, Майнкрафт. Вопросы придумываешь ты, играют друзья.</span></div></label>
+    <label><input type="radio" name="proj" value="pet"><div class="pc"><b>Цифровой питомец</b><span>Его надо кормить и играть с ним. Настроение меняется на глазах.</span></div></label>
+    <label><input type="radio" name="proj" value="card"><div class="pc"><b>Открытка-сюрприз</b><span>Поздравление для близкого человека с анимацией и музыкой в коде.</span></div></label>
+    <label><input type="radio" name="proj" value="levels"><div class="pc"><b>Игра с уровнями</b><span>Каждый уровень сложнее. Здесь одной команды мало, нужно разобраться.</span></div></label>
+  </div>
+  <div class="pick-cta" aria-live="polite">
+    <div class="label">Для родителя</div>
+    <p id="pickText">Ваш ребёнок только что сам сделал первый проект: описал его нейросети, запустил, починил и проверил её слова. Выбор второго проекта выше показывает, что ему интересно продолжать. Выберите с ним проект, и мы сделаем его вместе на бесплатном занятии.</p>
+    <p class="muted" style="font-size:.95rem">Занятие длится 60 минут. На нём я посмотрю уровень ребёнка, покажу то, что одним запросом не получается, и подскажу формат: индивидуально или группа. Если не подойдёт, ничего платить не нужно.</p>
+    <a class="btn" id="pickBtn" href="https://t.me/anya_filinova_bot?start=kids" target="_blank" rel="noopener">Записать ребёнка на бесплатное занятие</a>
+    <span class="muted" style="font-size:.9rem">Запись занимает две минуты: несколько вопросов и ваш контакт. Ребёнку можно сказать: «Я сделал проект, хочу сделать второй. Запиши меня».</span>
+  </div>
+</section>
+
 <section aria-labelledby="next" style="display:flex;flex-direction:column;gap:16px">
   <div>
     <div class="label">Что дальше</div>
@@ -368,10 +398,10 @@ a{color:var(--accent);font-weight:600}
 
 <section class="cta">
   <div class="label">Что дальше</div>
-  <h2>Хочешь сделать следующий проект со мной?</h2>
-  <p>На бесплатном занятии мы вместе соберём новый проект, которого нет в этом уроке. Ты придумаешь идею и правила, нейросеть напишет код, а я покажу, как проверять и чинить. Через 60 минут у тебя будет вторая работа в коллекции.</p>
-  <p>Родителям: на занятии мы смотрим уровень ребёнка и подбираем формат, индивидуальный или группу. Не подойдёт, ничего платить не придётся.</p>
-  <p class="muted"><b>Ссылка для записи:</b> <span id="ctaSlot">будет добавлена перед публикацией</span></p>
+  <h2>Запишите ребёнка на бесплатное занятие</h2>
+  <p>На бесплатном занятии мы с ребёнком вместе соберём новый проект, которого нет в этом уроке. Он придумает идею и правила, нейросеть напишет код, а я покажу, как проверять и чинить. Через 60 минут у него будет вторая работа в портфолио.</p>
+  <p>На занятии я смотрю уровень ребёнка и подбираю формат, индивидуальный или группу. Не подойдёт, ничего платить не придётся.</p>
+  <a class="btn" id="ctaBtn" href="https://t.me/anya_filinova_bot?start=kids" target="_blank" rel="noopener">Записаться на бесплатное занятие</a>
 </section>
 
 </div>
@@ -426,7 +456,7 @@ a{color:var(--accent);font-weight:600}
   boxes.forEach(function(b){ if(saved[b.getAttribute('data-step')]) b.checked=true; });
   function upd(){
     var n=boxes.filter(function(b){return b.checked}).length;
-    document.getElementById('pText').textContent='Пройдено '+n+' из '+boxes.length;
+    document.getElementById('pText').textContent=(n===boxes.length)?'Все шаги пройдены. Внизу выбери второй проект.':'Пройдено '+n+' из '+boxes.length;
     document.getElementById('pBar').style.width=(n/boxes.length*100)+'%';
     var s={};boxes.forEach(function(b){if(b.checked)s[b.getAttribute('data-step')]=1});
     try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
@@ -434,6 +464,22 @@ a{color:var(--accent);font-weight:600}
   boxes.forEach(function(b){b.addEventListener('change',upd)});
   upd();
 
+
+
+  /* Выбор второго проекта */
+  (function(){
+    var P={quiz:'Викторина про любимое',pet:'Цифровой питомец',card:'Открытка-сюрприз',levels:'Игра с уровнями'};
+    var inputs=[].slice.call(document.querySelectorAll('input[name="proj"]'));
+    var text=document.getElementById('pickText'),b1=document.getElementById('pickBtn'),b2=document.getElementById('ctaBtn');
+    function set(v){
+      var url='https://t.me/anya_filinova_bot?start=kids'+(v?'_'+v:'');
+      b1.href=url;b2.href=url;
+      if(v){text.textContent='Ваш ребёнок выбрал второй проект: «'+P[v]+'». Сделаем его вместе на бесплатном занятии за 60 минут. Он придумает героя и правила, а я покажу, как довести до конца то, что одним запросом не получается.';}
+      try{if(v)localStorage.setItem('lm-proj',v)}catch(e){}
+    }
+    try{var sv=localStorage.getItem('lm-proj');if(sv&&P[sv]){inputs.forEach(function(i){if(i.value===sv)i.checked=true});set(sv);}}catch(e){}
+    inputs.forEach(function(i){i.addEventListener('change',function(){set(i.value)})});
+  })();
 
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
